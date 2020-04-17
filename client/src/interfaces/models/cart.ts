@@ -12,7 +12,6 @@ export type DocData = {
 };
 
 export type Collection = {
-  routeName: string;
   id: string;
   title: string;
   items: TCartItem[];
@@ -20,6 +19,10 @@ export type Collection = {
 
 export type Collections = {
   [key: string]: Collection;
+};
+
+export type TCollections = {
+  collections: Collection[];
 };
 
 export type Cart = {

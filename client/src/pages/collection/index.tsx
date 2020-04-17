@@ -1,24 +1,24 @@
-import { connect } from "react-redux";
-import { createStructuredSelector } from "reselect";
-import { compose } from "redux";
+import React from "react";
+import { useQuery } from "@apollo/react-hooks";
+import { useRouteMatch } from "react-router-dom";
 
-import { RootState } from "../../interfaces";
-
-import { selectIsCollectionsLoaded } from "../../redux/shop/selectors";
-import WithSpinner from "../../components/with-spinner/";
 import CollectionPage from "./component";
+import Spinner from "../../components/spinner";
+import { GET_COLLECTION_BY_TITLE } from "./query";
+import { CollectionByTitle, QueryVars } from "./types";
 
-type Selector = {
-  isLoading: ReturnType<typeof selectIsCollectionsLoaded>;
+const CollectionsOverviewContainer = () => {
+  const match = useRouteMatch<{ collectionId: string }>();
+  const { loading, error, data } = useQuery<CollectionByTitle, QueryVars>(
+    GET_COLLECTION_BY_TITLE,
+    { variables: { title: match.params.collectionId } },
+  );
+
+  if (loading) return <Spinner />;
+  if (error) return <p>Error: {error.message}</p>;
+  if (!data) return null;
+
+  return <CollectionPage collection={data.getCollectionsByTitle} />;
 };
 
-const mapStateToProps = createStructuredSelector<RootState, Selector>({
-  isLoading: (state: RootState) => !selectIsCollectionsLoaded(state),
-});
-
-const CollectionPageContainer = compose<React.FC>(
-  connect(mapStateToProps),
-  WithSpinner,
-)(CollectionPage);
-
-export default CollectionPageContainer;
+export default CollectionsOverviewContainer;

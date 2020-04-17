@@ -15,10 +15,11 @@ const CollectionPreview = ({
   items,
   history,
   match,
-  routeName,
 }: Collection & RouteComponentProps) => (
   <CollectionPreviewContainer>
-    <TitleContainer onClick={() => history.push(`${match.path}/${routeName}`)}>
+    <TitleContainer
+      onClick={() => history.push(`${match.path}/${title.toLowerCase()}`)}
+    >
       {title.toUpperCase()}
     </TitleContainer>
     <PreviewContainer>
