@@ -1,0 +1,16 @@
+# Dependencies
+node_modules
+
+# Coverage reports
+coverage
+
+# Build output
+build
+dist
+
+# Local files
+*.local
+
+# Pacage managers
+.yarn
+yarn.lock
