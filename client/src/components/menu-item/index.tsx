@@ -8,9 +8,9 @@ import {
   ContentTitle,
   ContentSubtitle,
 } from "./styles";
-import { Sections } from "../../interfaces";
+import { Section } from "../../interfaces";
 
-const MenuItem = ({ title, imageUrl, size, linkUrl }: Sections) => {
+const MenuItem = ({ title, imageUrl, size, linkUrl }: Section) => {
   const history = useHistory();
   const match = useRouteMatch();
   return (

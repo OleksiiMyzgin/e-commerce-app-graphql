@@ -1,6 +1,6 @@
-import { Sections } from "../../interfaces";
+import { Section } from "../../interfaces";
 
-export const DIRECTORY_DATA: Sections[] = [
+export const DIRECTORY_DATA: Section[] = [
   {
     title: "hats",
     imageUrl: "https://i.ibb.co/cvpntL1/hats.png",

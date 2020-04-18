@@ -46,7 +46,7 @@ const App = ({ setCurrentUser, currentUser }: Props) => {
     return () => {
       unsubscribeFromAuth();
     };
-  }, [setCurrentUser]);
+  }, []); /* eslint-disable-line */
 
   return (
     <div>
