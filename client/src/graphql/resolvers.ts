@@ -1,58 +1,35 @@
-import { gql, ApolloClient } from "apollo-boost";
+import { ApolloClient } from "apollo-boost";
 
-import { addItemToCart } from "./utils";
-import { TCartItem } from "../interfaces";
-
-// Extend your server schema with a client-only field.
-// Type definitions should be capital.
-export const typeDefs = gql`
-  extend type Item {
-    quantity: Int
-  }
-
-  extend type Mutation {
-    ToggleCartHidden: Boolean!
-    AddItemToCart(item: Item!): [Item]!
-  }
-`;
-
-const GET_CART_HIDDEN = gql`
-  query {
-    cartHidden @client
-  }
-`;
-
-const GET_CART_ITEMS = gql`
-  {
-    cartItems @client
-  }
-`;
-
-type Context = {
-  cache: ApolloClient<any>;
-};
-
-type CartHiddenQuery = {
-  cartHidden: boolean;
-};
-
-type CartItemsQuery = {
-  cartItems: TCartItem[];
-};
+import {
+  addItemToCart,
+  removeItemFromCart,
+  getCartItemCount,
+  getCartTotal,
+  clearItemFromCart,
+} from "./utils";
+import { TCartItem, UserData } from "../interfaces";
+import { Context, CartHiddenQuery, CartItemsQuery } from "./types";
+import {
+  GET_CART_HIDDEN,
+  GET_CART_ITEMS,
+  GET_ITEM_COUNT,
+  GET_CART_TOTAL,
+  GET_CURRENT_USER,
+} from "./queries";
 
 const updateCartItemsRelatedQueries = (
   cache: ApolloClient<any>,
   newCartItems: TCartItem[],
 ) => {
-  // cache.writeQuery({
-  //   query: GET_ITEM_COUNT,
-  //   data: { itemCount: getCartItemCount(newCartItems) }
-  // });
+  cache.writeQuery({
+    query: GET_ITEM_COUNT,
+    data: { itemCount: getCartItemCount(newCartItems) },
+  });
 
-  // cache.writeQuery({
-  //   query: GET_CART_TOTAL,
-  //   data: { cartTotal: getCartTotal(newCartItems) }
-  // });
+  cache.writeQuery({
+    query: GET_CART_TOTAL,
+    data: { cartTotal: getCartTotal(newCartItems) },
+  });
 
   cache.writeQuery({
     query: GET_CART_ITEMS,
@@ -77,6 +54,7 @@ export const resolvers = {
 
       return !cartHidden;
     },
+
     addItemToCart: (
       _root: any,
       { item }: { item: TCartItem },
@@ -94,6 +72,57 @@ export const resolvers = {
       updateCartItemsRelatedQueries(cache, newCartItems);
 
       return newCartItems;
+    },
+
+    removeItemFromCart: (
+      _root: any,
+      { item }: { item: TCartItem },
+      { cache }: Context,
+    ) => {
+      const data = cache.readQuery({
+        query: GET_CART_ITEMS,
+      });
+
+      if (!data) return;
+      const { cartItems } = data;
+
+      const newCartItems = removeItemFromCart(cartItems, item);
+
+      updateCartItemsRelatedQueries(cache, newCartItems);
+
+      return newCartItems;
+    },
+
+    clearItemFromCart: (
+      _root: any,
+      { item }: { item: TCartItem },
+      { cache }: Context,
+    ) => {
+      const data = cache.readQuery({
+        query: GET_CART_ITEMS,
+      });
+
+      if (!data) return;
+      const { cartItems } = data;
+
+      const newCartItems = clearItemFromCart(cartItems, item);
+
+      updateCartItemsRelatedQueries(cache, newCartItems);
+
+      return newCartItems;
+    },
+
+    setCurrentUser: (
+      _root: any,
+      { user }: { user: UserData },
+      { cache }: Context,
+    ) => {
+      cache.writeQuery({
+        query: GET_CURRENT_USER,
+        data: { currentUser: user },
+      });
+
+      return user;
     },
   },
 };

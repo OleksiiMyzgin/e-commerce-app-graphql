@@ -19,7 +19,7 @@ export const addItemToCart = (
   return [...cartItems, { ...cartItemToAdd, quantity: 1 }];
 };
 
-export const removeItemToCart = (
+export const removeItemFromCart = (
   cartItems: TCartItem[],
   cartItemToRemove: TCartItem,
 ) => {
@@ -37,3 +37,19 @@ export const removeItemToCart = (
       : cartItem,
   );
 };
+
+export const getCartItemCount = (cartItems: TCartItem[]) =>
+  cartItems.reduce(
+    (accumalatedQuantity, cartItem) => accumalatedQuantity + cartItem.quantity,
+    0,
+  );
+
+export const getCartTotal = (cartItems: TCartItem[]) =>
+  cartItems.reduce(
+    (accumalatedQuantity, cartItem) =>
+      accumalatedQuantity + cartItem.quantity * cartItem.price,
+    0,
+  );
+
+export const clearItemFromCart = (cartItems: TCartItem[], item: TCartItem) =>
+  cartItems.filter((cartItem) => cartItem.id !== item.id);

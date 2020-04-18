@@ -1,7 +1,6 @@
 import React from "react";
-import { connect } from "react-redux";
-
-import { addItem } from "../../redux/cart/actions";
+import { gql, ApolloError } from "apollo-boost";
+import { useMutation } from "react-apollo";
 
 import {
   CollectionItemContainer,
@@ -11,16 +10,34 @@ import {
   NameContainer,
   PriceContainer,
 } from "./styles";
-import { Dispatch } from "redux";
+
 import { TCartItem } from "../../interfaces";
+
+const ADD_ITEM_TO_CART = gql`
+  mutation AddItemToCart($item: Item!) {
+    addItemToCart(item: $item) @client
+  }
+`;
 
 type Props = {
   item: TCartItem;
-  addItem(item: TCartItem): void;
 };
 
-const CollectionItem = ({ item, addItem }: Props) => {
+type MutationVars = {
+  item: TCartItem;
+};
+
+type QueryData = {
+  error: ApolloError | undefined;
+};
+
+const CollectionItem = ({ item }: Props) => {
+  const [addItemToCart, { error }] = useMutation<QueryData, MutationVars>(
+    ADD_ITEM_TO_CART,
+  );
   const { name, price, imageUrl } = item;
+
+  if (error) return <p>Error: {error.message}</p>;
 
   return (
     <CollectionItemContainer>
@@ -29,15 +46,18 @@ const CollectionItem = ({ item, addItem }: Props) => {
         <NameContainer>{name}</NameContainer>
         <PriceContainer>{price}</PriceContainer>
       </CollectionFooterContainer>
-      <AddButton onClick={() => addItem(item)} inverted>
+      <AddButton
+        onClick={() =>
+          addItemToCart({
+            variables: { item },
+          })
+        }
+        inverted
+      >
         Add to cart
       </AddButton>
     </CollectionItemContainer>
   );
 };
 
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  addItem: (item: TCartItem) => dispatch(addItem(item)),
-});
-
-export default connect(null, mapDispatchToProps)(CollectionItem);
+export default CollectionItem;

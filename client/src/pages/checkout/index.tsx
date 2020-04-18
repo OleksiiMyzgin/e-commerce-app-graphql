@@ -1,67 +1,28 @@
 import React from "react";
-import { connect } from "react-redux";
-import { createStructuredSelector } from "reselect";
+import { useQuery } from "react-apollo";
+import { gql } from "apollo-boost";
 
-import { RootState, TCartItem } from "../../interfaces";
+import CheckoutPage from "./component";
+import { TCartItem } from "../../interfaces";
 
-import CheckoutItem from "../../components/checkout-item";
-import StripeCheckoutButton from "../../components/stripe-button";
+const GET_CART_ITEMS_AND_TOTAL = gql`
+  {
+    cartItems @client
+    cartTotal @client
+  }
+`;
 
-import { selectCartItems, selectCartTotal } from "../../redux/cart/selectors";
-
-import {
-  CheckoutPageContainer,
-  CheckoutHeaderContainer,
-  HeaderBlockContainer,
-  TotalContainer,
-  WarningContainer,
-} from "./styles";
-
-type Props = {
+type Query = {
   cartItems: TCartItem[];
-  total: number;
+  cartTotal: number;
 };
 
-const CheckoutPage = ({ cartItems, total }: Props) => (
-  <CheckoutPageContainer>
-    <CheckoutHeaderContainer>
-      <HeaderBlockContainer>
-        <span>Product</span>
-      </HeaderBlockContainer>
-      <HeaderBlockContainer>
-        <span>Description</span>
-      </HeaderBlockContainer>
-      <HeaderBlockContainer>
-        <span>Quantity</span>
-      </HeaderBlockContainer>
-      <HeaderBlockContainer>
-        <span>Price</span>
-      </HeaderBlockContainer>
-      <HeaderBlockContainer>
-        <span>Remove</span>
-      </HeaderBlockContainer>
-    </CheckoutHeaderContainer>
-    {cartItems.map((cartItem) => (
-      <CheckoutItem key={cartItem.id} cartItem={cartItem} />
-    ))}
-    <TotalContainer>TOTAL: ${total}</TotalContainer>
-    <WarningContainer>
-      *Please use the following test credit card for payments*
-      <br />
-      4242 4242 4242 4242 - Exp: 01/20 - CVV: 123
-    </WarningContainer>
-    <StripeCheckoutButton price={total} />
-  </CheckoutPageContainer>
-);
+const CheckoutPageContainer = () => {
+  const { data } = useQuery<Query>(GET_CART_ITEMS_AND_TOTAL);
+  if (!data) return null;
 
-type Selector = {
-  cartItems: ReturnType<typeof selectCartItems>;
-  total: ReturnType<typeof selectCartTotal>;
+  const { cartItems, cartTotal } = data;
+  return <CheckoutPage cartItems={cartItems} total={cartTotal} />;
 };
 
-const mapStateToProps = createStructuredSelector<RootState, Selector>({
-  cartItems: selectCartItems,
-  total: selectCartTotal,
-});
-
-export default connect(mapStateToProps)(CheckoutPage);
+export default CheckoutPageContainer;

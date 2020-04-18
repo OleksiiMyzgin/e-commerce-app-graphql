@@ -1,9 +1,6 @@
-import React, { useEffect, lazy, Suspense } from "react";
-import { Route } from "react-router-dom";
-import { connect } from "react-redux";
-import { Dispatch } from "redux";
+import React, { lazy, Suspense } from "react";
+import { Route, useRouteMatch } from "react-router-dom";
 
-import { fetchCollectionsStart } from "../../redux/shop/actions";
 import Spinner from "../../components/spinner";
 
 const CollectionsOverview = lazy(() =>
@@ -11,18 +8,8 @@ const CollectionsOverview = lazy(() =>
 );
 const CollectionPageContainer = lazy(() => import("../collection"));
 
-type Props = {
-  fetchCollectionsStart(): void;
-  match: {
-    path: string;
-  };
-};
-
-const ShopPage = ({ fetchCollectionsStart, match }: Props) => {
-  useEffect(() => {
-    fetchCollectionsStart();
-  }, [fetchCollectionsStart]);
-
+const ShopPage = () => {
+  const match = useRouteMatch();
   return (
     <div className="shop-page">
       <Suspense fallback={<Spinner />}>
@@ -36,8 +23,4 @@ const ShopPage = ({ fetchCollectionsStart, match }: Props) => {
   );
 };
 
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  fetchCollectionsStart: () => dispatch(fetchCollectionsStart()),
-});
-
-export default connect(null, mapDispatchToProps)(ShopPage);
+export default ShopPage;

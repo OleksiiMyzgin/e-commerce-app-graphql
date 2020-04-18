@@ -1,55 +1,54 @@
 import React from "react";
-import { connect } from "react-redux";
-import { Dispatch } from "redux";
+import { useMutation } from "react-apollo";
+import { gql } from "apollo-boost";
 
+import CheckoutItem from "./component";
 import { TCartItem } from "../../interfaces";
 
-import {
-  clearItemFromCart,
-  addItem,
-  removeItem,
-} from "../../redux/cart/actions";
+const ADD_ITEM_TO_CART = gql`
+  mutation AddItemToCart($item: Item!) {
+    addItemToCart(item: $item) @client
+  }
+`;
 
-import {
-  CheckoutItemContainer,
-  ImageContainer,
-  TextContainer,
-  QuantityContainer,
-  RemoveButtonContainer,
-} from "./styles";
+const REMOVE_ITEM_FROM_CART = gql`
+  mutation RemoveItemFromCart($item: Item!) {
+    removeItemFromCart(item: $item) @client
+  }
+`;
+
+const CLEAR_ITEM_FROM_CART = gql`
+  mutation ClearItemFromCart($item: Item!) {
+    clearItemFromCart(item: $item) @client
+  }
+`;
 
 type Props = {
   cartItem: TCartItem;
-  clearItem(item: TCartItem): void;
-  addItem(item: TCartItem): void;
-  removeItem(item: TCartItem): void;
 };
 
-const CheckoutItem = ({ cartItem, clearItem, addItem, removeItem }: Props) => {
-  const { name, imageUrl, price, quantity } = cartItem;
+const CollectionItemContainer = ({ cartItem }: Props) => {
+  const [addItemToCart] = useMutation(ADD_ITEM_TO_CART);
+  const [removeItemFromCart] = useMutation(REMOVE_ITEM_FROM_CART);
+  const [clearItemFromCart] = useMutation(CLEAR_ITEM_FROM_CART);
+
+  const handleAddItemToCart = (item: TCartItem) =>
+    addItemToCart({ variables: { item } });
+
+  const handleRemoveItemFromCart = (item: TCartItem) =>
+    removeItemFromCart({ variables: { item } });
+
+  const handleClearItemFromCart = (item: TCartItem) =>
+    clearItemFromCart({ variables: { item } });
+
   return (
-    <CheckoutItemContainer>
-      <ImageContainer>
-        <img src={imageUrl} alt="item" />
-      </ImageContainer>
-      <TextContainer>{name}</TextContainer>
-      <QuantityContainer>
-        <div onClick={() => removeItem(cartItem)}>&#10094;</div>
-        <span>{quantity}</span>
-        <div onClick={() => addItem(cartItem)}>&#10095;</div>
-      </QuantityContainer>
-      <TextContainer>{price}</TextContainer>
-      <RemoveButtonContainer onClick={() => clearItem(cartItem)}>
-        &#10005;
-      </RemoveButtonContainer>
-    </CheckoutItemContainer>
+    <CheckoutItem
+      cartItem={cartItem}
+      addItem={handleAddItemToCart}
+      removeItem={handleRemoveItemFromCart}
+      clearItem={handleClearItemFromCart}
+    />
   );
 };
 
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  clearItem: (item: TCartItem) => dispatch(clearItemFromCart(item)),
-  addItem: (item: TCartItem) => dispatch(addItem(item)),
-  removeItem: (item: TCartItem) => dispatch(removeItem(item)),
-});
-
-export default connect(null, mapDispatchToProps)(CheckoutItem);
+export default CollectionItemContainer;
