@@ -1,37 +1,18 @@
 import React from "react";
-import { connect } from "react-redux";
-import { createStructuredSelector } from "reselect";
-import { Dispatch } from "redux";
+import { useMutation } from "react-apollo";
+import { gql } from "apollo-boost";
 
-import { RootState } from "../../interfaces";
+import CartIcon from "./component";
 
-import { toggleCartHidden } from "../../redux/cart/actions";
-import { selectCartItemsCount } from "../../redux/cart/selectors";
+const TOGGLE_CART_HIDDEN = gql`
+  mutation ToggleCartHidden {
+    toggleCartHidden @client
+  }
+`;
 
-import { CartContainer, ShoppingIcon, ItemCountContainer } from "./styles";
-
-type Props = {
-  toggleCartHidden(): void;
-  itemCount: number;
+const CartIconContainer = () => {
+  const [toggleCartHidden] = useMutation(TOGGLE_CART_HIDDEN);
+  return <CartIcon toggleCartHidden={toggleCartHidden} />;
 };
 
-const CartIcon = ({ toggleCartHidden, itemCount }: Props) => (
-  <CartContainer onClick={toggleCartHidden}>
-    <ShoppingIcon className="shopping-icon" />
-    <ItemCountContainer>{itemCount}</ItemCountContainer>
-  </CartContainer>
-);
-
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  toggleCartHidden: () => dispatch(toggleCartHidden()),
-});
-
-type Selector = {
-  itemCount: ReturnType<typeof selectCartItemsCount>;
-};
-
-const mapStateToProps = createStructuredSelector<RootState, Selector>({
-  itemCount: selectCartItemsCount,
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(CartIcon);
+export default CartIconContainer;
