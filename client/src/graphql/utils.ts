@@ -1,4 +1,4 @@
-import { TCartItem } from "../../interfaces";
+import { TCartItem } from "../interfaces";
 
 export const addItemToCart = (
   cartItems: TCartItem[],

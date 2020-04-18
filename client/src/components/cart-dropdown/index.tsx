@@ -1,56 +1,35 @@
 import React from "react";
-import { connect } from "react-redux";
-import { createStructuredSelector } from "reselect";
-import { withRouter, RouteComponentProps } from "react-router-dom";
-import { Dispatch } from "redux";
+import { useQuery, useMutation } from "react-apollo";
+import { gql } from "apollo-boost";
 
-import { RootState, TCartItem } from "../../interfaces";
+import CartDropdown from "./component";
+import { TCartItem } from "../../interfaces";
 
-import CartItem from "../cart-item";
-import { selectCartItems } from "../../redux/cart/selectors";
-import { toggleCartHidden } from "../../redux/cart/actions";
+const TOGGLE_CART_HIDDEN = gql`
+  mutation ToggleCartHidden {
+    toggleCartHidden @client
+  }
+`;
 
-import {
-  CartDropdownContainer,
-  CartDropdownButton,
-  EmptyMessageContainer,
-  CartItemsContainer,
-} from "./styles";
+const GET_CART_ITEMS = gql`
+  query {
+    cartItems @client
+  }
+`;
 
-type Props = {
-  cartItems: TCartItem[];
-  history: RouteComponentProps["history"];
-  dispatch: Dispatch;
+const CartDropdownContainer = () => {
+  const { error, data } = useQuery<{ cartItems: TCartItem[] }>(GET_CART_ITEMS);
+  const [toggleCartHidden] = useMutation(TOGGLE_CART_HIDDEN);
+
+  if (error) return <p>Error: {error.message}</p>;
+  if (!data) return null;
+
+  return (
+    <CartDropdown
+      cartItems={data.cartItems}
+      toggleCartHidden={toggleCartHidden}
+    />
+  );
 };
 
-const CartDropdown = ({ cartItems, history, dispatch }: Props) => (
-  <CartDropdownContainer>
-    <CartItemsContainer>
-      {cartItems.length ? (
-        cartItems.map((cartItem) => (
-          <CartItem key={cartItem.id} item={cartItem} />
-        ))
-      ) : (
-        <EmptyMessageContainer>Your cart is empty</EmptyMessageContainer>
-      )}
-    </CartItemsContainer>
-    <CartDropdownButton
-      onClick={() => {
-        history.push("/checkout");
-        dispatch(toggleCartHidden());
-      }}
-    >
-      GO TO CHECKOUT
-    </CartDropdownButton>
-  </CartDropdownContainer>
-);
-
-type Selector = {
-  cartItems: ReturnType<typeof selectCartItems>;
-};
-
-const mapStateToProps = createStructuredSelector<RootState, Selector>({
-  cartItems: selectCartItems,
-});
-
-export default withRouter(connect(mapStateToProps)(CartDropdown));
+export default CartDropdownContainer;

@@ -6,7 +6,7 @@ import { Dispatch } from "redux";
 import { RootState, UserData } from "../../interfaces";
 
 import CartIcon from "../cart-icon";
-import CartDropdown from "../cart-dropdown";
+import CartDropdownContainer from "../cart-dropdown";
 import { selectCurrentUser } from "../../redux/user/selectors";
 import { signOutStart } from "../../redux/user/actions";
 
@@ -41,7 +41,7 @@ const Header = ({ currentUser, hidden, signOutStart }: Props) => (
       )}
       <CartIcon />
     </OptionsContainer>
-    {hidden ? null : <CartDropdown />}
+    {hidden ? null : <CartDropdownContainer />}
   </HeaderContainer>
 );
 

@@ -1,6 +1,6 @@
 import { CartActionTypes } from "./action-types";
 import { Action } from "./actions";
-import { addItemToCart, removeItemToCart } from "./utils";
+import { addItemToCart, removeItemToCart } from "../../graphql/utils";
 
 import { Cart } from "../../interfaces";
 
